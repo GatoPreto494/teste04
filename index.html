@@ -16,7 +16,7 @@
     <meta property="og:image" content="https://i.postimg.cc/prrvJYKj/gatopreto-jpg.jpg" /> <!-- URL real -->
     <meta property="og:url" content="https://www.seusite.com" /> <!-- URL do seu site -->
     <meta property="og:type" content="website" />
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPworuKpZ4tVm8jM_wPfCMrEZ-p0n-Y_U&libraries=places&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPworuKpZ4tVm8jM_wPfCMrEZ-p0n-Y_U&libraries=places&callback=places" async defer></script>
 </head>
 <body>
     
@@ -1397,30 +1397,19 @@ input[type="number"] {
     <div class="menu-items" id="bebidas">
         <div class="item">
             <div class="controls">
-                <button class="btn btn-increase" onclick="updateQuantity('Coca 2l', 'decrease')">-</button>
-                <input type="number" id="Coca-2l-quantity" value="0" readonly>
-                <button class="btn btn-increase" onclick="updateQuantity('Coca 2l', 'increase')">+</button>
+                <button class="btn btn-increase"
+
+ onclick="updateQuantity('Refrigerante', 'decrease')">-</button>
+                <input type="number" id="Refrigerante-quantity" value="0" readonly>
+                <button class="btn btn-increase"
+
+ onclick="updateQuantity('Refrigerante', 'increase')">+</button>
             </div>
             <div class="text-content">
-                <span>Coca-Cola 2L</span>
-                <p class="description">Coca-Cola 2L para compartilhar com os amigos.</p>
-                <p class="price">R$ 17.00</p>
+                <span>Refrigerante</span>
+                <p class="description">Refrigerante gelado para acompanhar seu lanche.</p>
             </div>
         </div>
-        
-        <div class="item">
-            <div class="controls">
-                <button class="btn btn-increase" onclick="updateQuantity('Coca lata', 'decrease')">-</button>
-                <input type="number" id="Coca-lata-quantity" value="0" readonly>
-                <button class="btn btn-increase" onclick="updateQuantity('Coca lata', 'increase')">+</button>
-            </div>
-            <div class="text-content">
-                <span>Coca-Cola lata 350 mL</span>
-                <p class="description">Coca-Cola lata para um lanche rápido.</p>
-                <p class="price">R$ 6.00</p>
-            </div>
-        </div>
-        
     </div>
 </div>
 
@@ -1597,40 +1586,8 @@ input[type="number"] {
     
 
     <script>
-function solicitarLocalizacao() {
-    if (!navigator.geolocation) {
-        alert("Seu navegador não suporta geolocalização.");
-        return;
-    }
 
-    // Cria um bloqueio na tela
-    exibirBloqueio();
 
-    navigator.permissions.query({ name: "geolocation" }).then(function (result) {
-        if (result.state === "granted") {
-            obterLocalizacao();
-        } else if (result.state === "prompt") {
-            exibirPopup();
-        } else {
-            alert("⚠️ A localização é obrigatória para continuar! Ative-a nas configurações do navegador.");
-            setTimeout(solicitarLocalizacao, 5000); // Tenta novamente após 5 segundos
-        }
-    });
-}
-
-function obterLocalizacao() {
-    navigator.geolocation.getCurrentPosition(
-        function (position) {
-            console.log("Localização obtida:", position.coords.latitude, position.coords.longitude);
-            alert("Localização confirmada! Calculando taxa de entrega...");
-            removerBloqueio();
-        },
-        function (error) {
-            alert("Erro ao obter localização. Ative a permissão para continuar.");
-            setTimeout(solicitarLocalizacao, 5000); // Tenta novamente após 5 segundos
-        }
-    );
-}
 
 // Cria um overlay bloqueador
 function exibirBloqueio() {
@@ -1679,81 +1636,6 @@ function aceitarLocalizacao() {
     obterLocalizacao();
 }
 
-function verificarPermissaoLocalizacao() {
-    if (!navigator.geolocation) {
-        alert("Seu navegador não suporta geolocalização.");
-        return;
-    }
-
-    navigator.permissions.query({ name: "geolocation" }).then(function (result) {
-        if (result.state === "granted") {
-            console.log("✅ Localização permitida.");
-            permitirConfirmarPedido();
-        } else {
-            bloquearTelaSolicitacao();
-        }
-    });
-}
-
-function permitirConfirmarPedido() {
-    removerBloqueio();
-    document.getElementById("popup-endereco").style.display = "flex";
-}
-
-function bloquearTelaSolicitacao() {
-    let bloqueio = document.getElementById("popup-localizacao");
-
-    if (!bloqueio) {
-        bloqueio = document.createElement("div");
-        bloqueio.id = "popup-localizacao";
-        bloqueio.style = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); z-index: 10000;
-            display: flex; justify-content: center; align-items: center;
-            color: white; text-align: center; font-size: 18px;
-        `;
-        bloqueio.innerHTML = `
-            <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; width: 300px; color: black;">
-                <p>📍 Precisamos da sua localização para calcular a taxa de entrega.</p>
-                <p>Por favor, permita o acesso à localização.</p>
-                <button onclick="solicitarLocalizacao()" 
-                    style="background: green; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">
-                    Permitir Localização
-                </button>
-                <p style="font-size: 14px; color: red; margin-top: 10px; display: none;" id="erro-localizacao">
-                    ⚠️ Você negou a permissão. Vá até as configurações do navegador para ativá-la.
-                </p>
-            </div>
-        `;
-        document.body.appendChild(bloqueio);
-        document.body.style.overflow = "hidden"; // Impede a rolagem
-    }
-}
-
-function solicitarLocalizacao() {
-    navigator.geolocation.getCurrentPosition(
-        function (position) {
-            console.log("Localização obtida:", position.coords.latitude, position.coords.longitude);
-            alert("Localização confirmada! Você pode continuar.");
-            removerBloqueio();
-            permitirConfirmarPedido();
-        },
-        function (error) {
-            document.getElementById("erro-localizacao").style.display = "block"; // Mostra erro
-        }
-    );
-}
-
-function removerBloqueio() {
-    let bloqueio = document.getElementById("popup-localizacao");
-    if (bloqueio) bloqueio.remove();
-    document.body.style.overflow = "auto"; // Volta a rolagem normal
-}
-
-// Ativa a verificação quando o usuário clica em "Confirmar Pedido"
-document.getElementById("confirmar-pedido").addEventListener("click", verificarPermissaoLocalizacao);
-
-
 // Executa ao carregar a página
 window.onload = solicitarLocalizacao;
 
@@ -1766,13 +1648,7 @@ window.onload = solicitarLocalizacao;
     const lojaLongitude = -46.35368762901921;
    
  
-        function initMap() {
-    if (navigator.geolocation) {
-       desativar
-    }
-}
-
-
+        
 
 // Obtém a localização do usuário e calcula a distância
 function getUserLocation() {
@@ -1794,7 +1670,49 @@ function getUserLocation() {
     }
 }
 
-// Calcula a distância do usuário até a loja
+function solicitarLocalizacao() {
+    if (!navigator.geolocation) {
+        alert("Seu navegador não suporta geolocalização.");
+        return;
+    }
+
+    // Bloqueia a tela para forçar o usuário a permitir a localização
+    exibirBloqueio();
+
+    navigator.permissions.query({ name: "geolocation" }).then(function (result) {
+        if (result.state === "granted") {
+            obterLocalizacao();
+        } else if (result.state === "prompt") {
+            exibirPopup();
+        } else {
+            alert("⚠️ A localização é obrigatória para continuar! Ative-a nas configurações do navegador.");
+            setTimeout(solicitarLocalizacao, 5000);
+        }
+    });
+}
+
+function obterLocalizacao() {
+    navigator.geolocation.getCurrentPosition(
+        function (position) {
+            const latUsuario = position.coords.latitude;
+            const lngUsuario = position.coords.longitude;
+            console.log(`📍 Localização do usuário: ${latUsuario}, ${lngUsuario}`);
+            
+            calcularDistancia(latUsuario, lngUsuario);
+            removerBloqueio(); // Remove bloqueio da tela
+        },
+        function (error) {
+            alert("Erro ao obter localização. Ative a permissão para continuar.");
+            setTimeout(solicitarLocalizacao, 5000);
+        }
+    );
+}
+
+// Coordenadas do estabelecimento
+const lojaLatitude = -23.053728508978047;
+const lojaLongitude = -46.35368762901921;
+
+// Função para calcular a distância e taxa de entrega
 function calcularDistancia(userLat, userLng) {
     if (typeof google === 'undefined' || !google.maps) {
         console.error("Google Maps API não carregado.");
@@ -1815,7 +1733,6 @@ function calcularDistancia(userLat, userLng) {
             const distanciaKm = response.rows[0].elements[0].distance.value / 1000;
             console.log(`📍 Distância calculada: ${distanciaKm.toFixed(2)} km`);
 
-            // ✅ FAIXAS DE TAXA FIXA (SEM CÁLCULO POR KM)
             let taxaEntrega;
             if (distanciaKm <= 2) {
                 taxaEntrega = 5.00;
@@ -1830,12 +1747,10 @@ function calcularDistancia(userLat, userLng) {
             } else if (distanciaKm <= 100) {
                 taxaEntrega = 40.00;
             } else {
-                taxaEntrega = 70.00; // Para distâncias muito longas
+                taxaEntrega = 70.00;
             }
 
-            // Salva a taxa para uso posterior
             sessionStorage.setItem("taxaEntrega", taxaEntrega);
-
             alert(`📍 Distância: ${distanciaKm.toFixed(2)} km. Taxa de entrega: R$ ${taxaEntrega.toFixed(2)}`);
         } else {
             console.error("Erro ao calcular distância:", response);
@@ -1844,6 +1759,8 @@ function calcularDistancia(userLat, userLng) {
     });
 }
 
+// Executa ao carregar a página
+window.onload = solicitarLocalizacao;
 
 
 
@@ -1907,7 +1824,8 @@ function calcularDistancia(userLat, userLng) {
            }
        }
 
-       function checkPaymentMethod() {
+    // Função para verificar a forma de pagamento e abrir o pop-up de troco
+    function checkPaymentMethod() {
     console.log("Verificando forma de pagamento...");
 
     let paymentMethod = document.getElementById("forma-pagamento").value;
@@ -1920,51 +1838,14 @@ function calcularDistancia(userLat, userLng) {
         erroPagamento.style.display = "none";
     }
 
-    // Se for pagamento em dinheiro, perguntar sobre o troco
-    if (paymentMethod === "dinheiro") {
-        document.getElementById("popup-troco").style.display = "flex";
-    } else {
-        // Se não for dinheiro, pula a pergunta do troco
-        localStorage.setItem("troco", "Não precisa");
-        abrirPopupAdicionais();
-    }
-}
+    // Obtém a taxa de entrega salva ou usa padrão
+    let taxaEntrega = sessionStorage.getItem("taxaEntrega") || 10.00;
+    atualizarResumoPedido(taxaEntrega);
 
-// Exibe ou oculta o campo de troco corretamente
-function showTrocoInput(needsChange) {
-    let trocoDiv = document.getElementById("troco-input-div");
-
-    if (needsChange) {
-        trocoDiv.style.display = "block"; // Mostra o campo de valor do troco
-    } else {
-        trocoDiv.style.display = "none"; 
-        localStorage.setItem("troco", "Não precisa");
-        document.getElementById("popup-troco").style.display = "none";
-        abrirPopupAdicionais(); // Continua para os adicionais
-    }
-}
-
-// Confirmação do valor do troco antes de seguir
-function confirmTroco() {
-    let valorTroco = document.getElementById("valor-troco").value.trim();
-
-    if (!valorTroco) {
-        alert("⚠️ Por favor, insira o valor para o troco.");
-        return;
-    }
-
-    localStorage.setItem("troco", `Precisa de troco para R$ ${valorTroco}`);
-    document.getElementById("popup-troco").style.display = "none";
-    
-    abrirPopupAdicionais(); // Continua para os adicionais
-}
-
-// Função para abrir o pop-up de adicionais após definir o troco
-function abrirPopupAdicionais() {
+    // Exibe o popup de adicionais antes de confirmar o pedido
     document.getElementById("popup-caixa02-adicional").style.display = "flex";
 }
 
-    
 // Função para confirmar os adicionais e seguir para a confirmação do pedido
 function confirmarAdicionais() {
     atualizarResumoPedido(); // Atualiza resumo com os adicionais
@@ -1996,9 +1877,18 @@ function pularAdicionais() {
 
 
 
-    
+    // Exibe ou oculta o campo de valor do troco
+    function showTrocoInput(needsChange) {
+        if (needsChange) {
+            document.getElementById("troco-input-div").style.display = "block";
+        } else {
+            localStorage.setItem("troco", "Não precisa"); // Armazena a resposta
+            document.getElementById("popup-troco").style.display = "none";
+            proceedToOrder(); // Continua para o pedido
+        }
+    }
 
-function atualizarResumoPedido() {
+    function atualizarResumoPedido() {
     let total = 0;
     let resumoItens = "";
     let resumoExtras = "";
@@ -2097,19 +1987,18 @@ let extras = [
 }
 
 
-function confirmTroco() {
-    let valorTroco = document.getElementById("valor-troco").value.trim();
+    // Confirma o valor do troco e segue para o pedido
+    function confirmTroco() {
+        let trocoValue = document.getElementById("valor-troco").value;
+        if (trocoValue.trim() === "" || isNaN(trocoValue) || trocoValue <= 0) {
+            alert("Por favor, informe um valor válido para o troco.");
+            return;
+        }
 
-    if (!valorTroco) {
-        alert("⚠️ Por favor, insira o valor para o troco.");
-        return;
+        sessionStorage.setItem("troco", "Precisa de troco para R$ " + parseFloat(trocoValue).toFixed(2));
+        document.getElementById("popup-troco").style.display = "none";
+        proceedToOrder(); // Continua para o pedido
     }
-
-    localStorage.setItem("troco", `Precisa de troco para R$ ${valorTroco}`);
-    document.getElementById("popup-troco").style.display = "none";
-    
-    proceedToOrder(); // Continua para a confirmação do pedido
-}
 
 
     // Exibe o popup de adicionais antes do resumo do pedido
@@ -2290,35 +2179,20 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("btn-continuar").disabled = true;
 });
 
-// Função para obter a localização do usuário
-function obterLocalizacao() {
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-            function (position) {
-                const userLat = position.coords.latitude;
-                const userLng = position.coords.longitude;
 
-                console.log(`Localização do usuário: ${userLat}, ${userLng}`);
+function calcularTaxaEntrega(distanciaKm) {
+    let taxaEntrega = 0;
+    if (distanciaKm <= 5) taxaEntrega = 5.00;
+    else if (distanciaKm <= 10) taxaEntrega = 10.00;
+    else if (distanciaKm <= 15) taxaEntrega = 15.00;
+    else taxaEntrega = 20.00;
+    
 
-                // Calcula a taxa de entrega com base na localização do usuário
-                calcularTaxaEntrega(userLat, userLng);
+    document.getElementById("distance").innerHTML += `<br>Taxa de entrega: R$ ${taxaEntrega.toFixed(2)}`;
 
-                // Habilita o botão de continuar
-                document.getElementById("btn-continuar").disabled = false;
-                document.getElementById("mensagem-alerta").innerText = ""; // Remove mensagem de erro
-            },
-            function (error) {
-                console.error("Erro ao obter localização:", error);
-                document.getElementById("mensagem-alerta").innerText = "⚠️ Você precisa permitir a localização para continuar!";
-                document.getElementById("btn-continuar").disabled = true; // Mantém bloqueado
-            }
-        );
-    } else {
-        alert("Geolocalização não é suportada pelo seu navegador.");
-    }
+    // Atualiza o resumo do pedido com a taxa de entrega correta
+    atualizarResumoPedido(taxaEntrega);
 }
-
-
 
 
 
