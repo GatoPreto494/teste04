@@ -1597,7 +1597,15 @@ input[type="number"] {
  
         function initMap() {
     if (navigator.geolocation) {
-       desativado
+        navigator.geolocation.getCurrentPosition(function (position) {
+            const latUsuario = position.coords.latitude;
+            const lngUsuario = position.coords.longitude;
+            calcularDistancia(latUsuario, lngUsuario);
+        }, function (error) {
+            alert("Não foi possível obter sua localização.");
+        });
+    } else {
+        alert("Geolocalização não suportada pelo seu navegador.");
     }
 }
 
