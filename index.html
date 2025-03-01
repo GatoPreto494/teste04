@@ -2004,36 +2004,53 @@ function atualizarResumoPedido() {
     let resumoExtras = "";
 
     let observacao = document.getElementById("observacao").value.trim();
-    let troco = sessionStorage.getItem("troco") || "Não precisa"; // Recupera o troco
-    let taxaEntrega = parseFloat(sessionStorage.getItem("taxaEntrega")) || 0; // Recupera taxa de entrega
+    let troco = sessionStorage.getItem("troco") || "";
+
+    // Recupera a taxa de entrega salva
+    let taxaEntrega = parseFloat(sessionStorage.getItem("taxaEntrega")) || 0;
 
     let items = [
-        { name: "Queijo Quente Salada", id: "Queijo Quente Salada-quantity", price: 20.00 },
-        { name: "Queijo Quente", id: "Queijo Quente-quantity", price: 19.00 },
-        { name: "Misto Quente", id: "Misto Quente-quantity", price: 19.00 },
-        { name: "Bauru", id: "Bauru-quantity", price: 20.00 },
-        { name: "Americano", id: "Americano-quantity", price: 22.00 },
-        { name: "Mistão", id: "Mistão-quantity", price: 23.00 },
-        { name: "X-Salada", id: "X-Salada-quantity", price: 22.00 },
-        { name: "X-Bacon", id: "X-Bacon-quantity", price: 26.00 },
-        { name: "X-Burguer", id: "X-Burguer-quantity", price: 21.00 },
-        { name: "X-Burguer Duplo", id: "X-Burguer Duplo-quantity", price: 30.00 },
-        { name: "X-Egg", id: "X-Egg-quantity", price: 24.00 },
-        { name: "Refrigerante", id: "Refrigerante-quantity", price: 5.00 }
-    ];
+    { name: "Queijo Quente Salada", id: "Queijo Quente Salada-quantity", price: 20.00 },
+    { name: "Queijo Quente", id: "Queijo Quente-quantity", price: 19.00 },
+    { name: "Misto Quente", id: "Misto Quente-quantity", price: 19.00 },
+    { name: "Bauru", id: "Bauru-quantity", price: 20.00 },
+    { name: "Americano", id: "Americano-quantity", price: 22.00 },
+    { name: "Mistão", id: "Mistão-quantity", price: 23.00 },
+    { name: "X-Salada", id: "X-Salada-quantity", price: 22.00 },
+    { name: "X-Bacon", id: "X-Bacon-quantity", price: 26.00 },
+    { name: "X-Burguer", id: "X-Burguer-quantity", price: 21.00 },
+    { name: "X-Burguer Duplo", id: "X-Burguer Duplo-quantity", price: 30.00 },
+    { name: "X-Egg", id: "X-Egg-quantity", price: 24.00 },
+    { name: "X-Bacon Egg", id: "X-Bacon Egg-quantity", price: 28.00 },
+    { name: "X-Bacon Calabresa", id: "X-Bacon Calabresa-quantity", price: 28.00 },
+    { name: "X-Crock", id: "X-Crock-quantity", price: 24.00 },
+    { name: "Lanche da Casa", id: "Lanche da Casa-quantity", price: 29.00 },
+    { name: "X-Calabresa", id: "X-Calabresa-quantity", price: 22.00 },
+    { name: "X-Tudo", id: "X-Tudo-quantity", price: 35.00 },
+    { name: "X-Frango Crock", id: "X-Frango Crock-quantity", price: 26.00 },
+    { name: "X-Framburguer", id: "X-Framburguer-quantity", price: 32.00 },
+    { name: "X-Frango Bacon Egg", id: "X-Frango Bacon Egg-quantity", price: 28.00 },
+    { name: "X-Frango", id: "X-Frango-quantity", price: 23.00 },
+    { name: "X-Frango Catupiry", id: "X-Frango Catupiry-quantity", price: 30.00 },
+    { name: "X-Frango Cheddar", id: "X-Frango Cheddar-quantity", price: 30.00 },
+    { name: "X-Frango Catupiry Milho", id: "X-Frango Catupiry Milho-quantity", price: 32.00 },
+    { name: "X-Frango Cheddar Milho", id: "X-Frango Cheddar Milho-quantity", price: 32.00 },
+    { name: "X-Frango Egg", id: "X-Frango Egg-quantity", price: 25.00 },
+    { name: "X-Frango Bacon", id: "X-Frango Bacon-quantity", price: 25.00 },
+    { name: "Refrigerante", id: "Refrigerante-quantity", price: 5.00 }
+];
 
-    let extras = [
-        { name: "Hamburguer", id: "Hamburguer-quantity", price: 9.00 },
-        { name: "Bacon", id: "Bacon-quantity", price: 7.00 },
-        { name: "Batata Palha", id: "BatataPalha-quantity", price: 3.00 },
-        { name: "Cheddar", id: "Cheddar-quantity", price: 7.00 },
-        { name: "Catupiry", id: "Catupiry-quantity", price: 7.00 },
-        { name: "Milho", id: "Milho-quantity", price: 2.00 },
-        { name: "Salada", id: "Salada-quantity", price: 2.00 },
-        { name: "Maionese", id: "Maionese-quantity", price: 3.00 }
-    ];
+let extras = [
+    { name: "Hamburguer", id: "Hamburguer-quantity", price: 9.00 },
+    { name: "Bacon", id: "Bacon-quantity", price: 7.00 },
+    { name: "Batata Palha", id: "BatataPalha-quantity", price: 3.00 },
+    { name: "Cheddar", id: "Cheddar-quantity", price: 7.00 },
+    { name: "Catupiry", id: "Catupiry-quantity", price: 7.00 },
+    { name: "Milho", id: "Milho-quantity", price: 2.00 },
+    { name: "Salada", id: "Salada-quantity", price: 2.00 },
+    { name: "Maionese", id: "Maionese-quantity", price: 3.00 }
+];
 
-    // Calcula total de itens
     items.forEach(item => {
         let quantity = parseInt(document.getElementById(item.id)?.value || 0);
         if (quantity > 0) {
@@ -2042,7 +2059,6 @@ function atualizarResumoPedido() {
         }
     });
 
-    // Calcula total de extras
     extras.forEach(extra => {
         let quantity = parseInt(document.getElementById(extra.id)?.value || 0);
         if (quantity > 0) {
@@ -2051,15 +2067,15 @@ function atualizarResumoPedido() {
         }
     });
 
-    // Adiciona taxa de entrega
+    // Adiciona a taxa de entrega ao total
     total += taxaEntrega;
 
     // Atualiza os elementos do resumo do pedido
     document.getElementById("itens-pedido").innerHTML = resumoItens;
-    document.getElementById("extras-pedido").innerHTML = resumoExtras || "<div>Sem adicionais</div>"; 
+    document.getElementById("extras-pedido").innerHTML = resumoExtras || "<div>Sem adicionais</div>"; // Se não tiver extras, mostra "Sem adicionais"
     document.getElementById("total-pedido").innerText = `R$ ${total.toFixed(2)}`;
 
-    // Exibir taxa de entrega
+    // Garante que a taxa de entrega apareça no resumo do pedido
     let taxaEntregaElement = document.getElementById("taxa-entrega");
     if (!taxaEntregaElement) {
         taxaEntregaElement = document.createElement("div");
@@ -2068,9 +2084,9 @@ function atualizarResumoPedido() {
         taxaEntregaElement.style.color = "red";
         document.getElementById("order-summary").appendChild(taxaEntregaElement);
     }
-    taxaEntregaElement.innerHTML = `🚚 Taxa de entrega: R$ ${taxaEntrega.toFixed(2)}`;
+    taxaEntregaElement.innerHTML = `🚚 Taxa de entrega: R$ ${taxaEntrega}`;
 
-    // Exibir observação
+    // Adiciona observação se houver
     let observacaoElement = document.getElementById("observacao-pedido");
     if (!observacaoElement) {
         observacaoElement = document.createElement("div");
@@ -2078,30 +2094,8 @@ function atualizarResumoPedido() {
         document.getElementById("order-summary").appendChild(observacaoElement);
     }
     observacaoElement.innerHTML = observacao ? `📝 Observação: ${observacao}` : "<div>Sem observações</div>";
-
-    // ✅ Exibir troco no resumo do pedido
-    let trocoElement = document.getElementById("troco-pedido");
-    if (!trocoElement) {
-        trocoElement = document.createElement("div");
-        trocoElement.id = "troco-pedido";
-        document.getElementById("order-summary").appendChild(trocoElement);
-    }
-    trocoElement.innerHTML = `💰 Troco: ${troco}`;
 }
 
-
-function showTrocoInput(needsChange) {
-    let trocoDiv = document.getElementById("troco-input-div");
-
-    if (needsChange) {
-        trocoDiv.style.display = "block"; // Mostra o campo para inserir o valor do troco
-    } else {
-        trocoDiv.style.display = "none"; 
-        localStorage.setItem("troco", "Não precisa"); // Salva no armazenamento
-        document.getElementById("popup-troco").style.display = "none";
-        proceedToOrder(); // Continua para o pedido
-    }
-}
 
 function confirmTroco() {
     let valorTroco = document.getElementById("valor-troco").value.trim();
@@ -2324,19 +2318,7 @@ function obterLocalizacao() {
     }
 }
 
-function calcularTaxaEntrega(distanciaKm) {
-    let taxaEntrega = 0;
-    if (distanciaKm <= 5) taxaEntrega = 5.00;
-    else if (distanciaKm <= 10) taxaEntrega = 10.00;
-    else if (distanciaKm <= 15) taxaEntrega = 15.00;
-    else taxaEntrega = 20.00;
-    
 
-    document.getElementById("distance").innerHTML += `<br>Taxa de entrega: R$ ${taxaEntrega.toFixed(2)}`;
-
-    // Atualiza o resumo do pedido com a taxa de entrega correta
-    atualizarResumoPedido(taxaEntrega);
-}
 
 
 
