@@ -44,10 +44,7 @@
             <span id="carrinho-btn" onclick="toggleCarrinho()">🛒<span id="carrinho-contador">0</span></span>
         </h1>
     </div>
-    <button onclick="getUserLocation()" style="position: fixed; top: 10px; right: 10px; padding: 10px; background: orange; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        Testar Localização 📍
-    </button>
-
+    
     <!-- Pop-up do Carrinho -->
     <div id="carrinho-popup">
         <h2>🛍️ Seu Carrinho</h2>
@@ -1400,19 +1397,30 @@ input[type="number"] {
     <div class="menu-items" id="bebidas">
         <div class="item">
             <div class="controls">
-                <button class="btn btn-increase"
-
- onclick="updateQuantity('Refrigerante', 'decrease')">-</button>
-                <input type="number" id="Refrigerante-quantity" value="0" readonly>
-                <button class="btn btn-increase"
-
- onclick="updateQuantity('Refrigerante', 'increase')">+</button>
+                <button class="btn btn-increase" onclick="updateQuantity('Coca 2l', 'decrease')">-</button>
+                <input type="number" id="Coca-2l-quantity" value="0" readonly>
+                <button class="btn btn-increase" onclick="updateQuantity('Coca 2l', 'increase')">+</button>
             </div>
             <div class="text-content">
-                <span>Refrigerante</span>
-                <p class="description">Refrigerante gelado para acompanhar seu lanche.</p>
+                <span>Coca-Cola 2L</span>
+                <p class="description">Coca-Cola 2L para compartilhar com os amigos.</p>
+                <p class="price">R$ 17.00</p>
             </div>
         </div>
+        
+        <div class="item">
+            <div class="controls">
+                <button class="btn btn-increase" onclick="updateQuantity('Coca lata', 'decrease')">-</button>
+                <input type="number" id="Coca-lata-quantity" value="0" readonly>
+                <button class="btn btn-increase" onclick="updateQuantity('Coca lata', 'increase')">+</button>
+            </div>
+            <div class="text-content">
+                <span>Coca-Cola lata 350 mL</span>
+                <p class="description">Coca-Cola lata para um lanche rápido.</p>
+                <p class="price">R$ 6.00</p>
+            </div>
+        </div>
+        
     </div>
 </div>
 
@@ -1589,6 +1597,169 @@ input[type="number"] {
     
 
     <script>
+function solicitarLocalizacao() {
+    if (!navigator.geolocation) {
+        alert("Seu navegador não suporta geolocalização.");
+        return;
+    }
+
+    // Cria um bloqueio na tela
+    exibirBloqueio();
+
+    navigator.permissions.query({ name: "geolocation" }).then(function (result) {
+        if (result.state === "granted") {
+            obterLocalizacao();
+        } else if (result.state === "prompt") {
+            exibirPopup();
+        } else {
+            alert("⚠️ A localização é obrigatória para continuar! Ative-a nas configurações do navegador.");
+            setTimeout(solicitarLocalizacao, 5000); // Tenta novamente após 5 segundos
+        }
+    });
+}
+
+function obterLocalizacao() {
+    navigator.geolocation.getCurrentPosition(
+        function (position) {
+            console.log("Localização obtida:", position.coords.latitude, position.coords.longitude);
+            alert("Localização confirmada! Calculando taxa de entrega...");
+            removerBloqueio();
+        },
+        function (error) {
+            alert("Erro ao obter localização. Ative a permissão para continuar.");
+            setTimeout(solicitarLocalizacao, 5000); // Tenta novamente após 5 segundos
+        }
+    );
+}
+
+// Cria um overlay bloqueador
+function exibirBloqueio() {
+    if (!document.getElementById("bloqueio")) {
+        let bloqueio = document.createElement("div");
+        bloqueio.id = "bloqueio";
+        bloqueio.style = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.7); z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            color: white; font-size: 18px; text-align: center;
+        `;
+        bloqueio.innerHTML = `<p>🚫 Você precisa permitir a localização para continuar.</p>`;
+        document.body.appendChild(bloqueio);
+        document.body.style.overflow = "hidden"; // Impede rolagem
+    }
+}
+
+// Remove o bloqueio após permissão
+function removerBloqueio() {
+    let bloqueio = document.getElementById("bloqueio");
+    if (bloqueio) bloqueio.remove();
+    document.body.style.overflow = "auto"; // Volta a rolagem normal
+}
+
+// Exibe um pop-up para incentivar o usuário a permitir a localização
+function exibirPopup() {
+    if (document.getElementById("popup-localizacao")) return;
+
+    let popup = document.createElement("div");
+    popup.id = "popup-localizacao";
+    popup.innerHTML = `
+        <div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+        background:white; padding:20px; border-radius:10px; text-align:center; 
+        box-shadow:0 0 10px rgba(0,0,0,0.2); z-index:1001; width: 300px; padding: 20px;">
+            <p>📍 Precisamos da sua localização para calcular a taxa de entrega.</p>
+            <p>Clique abaixo para permitir.</p>
+            <button onclick="aceitarLocalizacao()" style="background:green; color:white; padding:10px; border:none; border-radius:5px; cursor:pointer;">Permitir Localização</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+}
+
+function aceitarLocalizacao() {
+    document.getElementById("popup-localizacao").remove();
+    obterLocalizacao();
+}
+
+function verificarPermissaoLocalizacao() {
+    if (!navigator.geolocation) {
+        alert("Seu navegador não suporta geolocalização.");
+        return;
+    }
+
+    navigator.permissions.query({ name: "geolocation" }).then(function (result) {
+        if (result.state === "granted") {
+            console.log("✅ Localização permitida.");
+            permitirConfirmarPedido();
+        } else {
+            bloquearTelaSolicitacao();
+        }
+    });
+}
+
+function permitirConfirmarPedido() {
+    removerBloqueio();
+    document.getElementById("popup-endereco").style.display = "flex";
+}
+
+function bloquearTelaSolicitacao() {
+    let bloqueio = document.getElementById("popup-localizacao");
+
+    if (!bloqueio) {
+        bloqueio = document.createElement("div");
+        bloqueio.id = "popup-localizacao";
+        bloqueio.style = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+            color: white; text-align: center; font-size: 18px;
+        `;
+        bloqueio.innerHTML = `
+            <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; width: 300px; color: black;">
+                <p>📍 Precisamos da sua localização para calcular a taxa de entrega.</p>
+                <p>Por favor, permita o acesso à localização.</p>
+                <button onclick="solicitarLocalizacao()" 
+                    style="background: green; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">
+                    Permitir Localização
+                </button>
+                <p style="font-size: 14px; color: red; margin-top: 10px; display: none;" id="erro-localizacao">
+                    ⚠️ Você negou a permissão. Vá até as configurações do navegador para ativá-la.
+                </p>
+            </div>
+        `;
+        document.body.appendChild(bloqueio);
+        document.body.style.overflow = "hidden"; // Impede a rolagem
+    }
+}
+
+function solicitarLocalizacao() {
+    navigator.geolocation.getCurrentPosition(
+        function (position) {
+            console.log("Localização obtida:", position.coords.latitude, position.coords.longitude);
+            alert("Localização confirmada! Você pode continuar.");
+            removerBloqueio();
+            permitirConfirmarPedido();
+        },
+        function (error) {
+            document.getElementById("erro-localizacao").style.display = "block"; // Mostra erro
+        }
+    );
+}
+
+function removerBloqueio() {
+    let bloqueio = document.getElementById("popup-localizacao");
+    if (bloqueio) bloqueio.remove();
+    document.body.style.overflow = "auto"; // Volta a rolagem normal
+}
+
+// Ativa a verificação quando o usuário clica em "Confirmar Pedido"
+document.getElementById("confirmar-pedido").addEventListener("click", verificarPermissaoLocalizacao);
+
+
+// Executa ao carregar a página
+window.onload = solicitarLocalizacao;
+
+
+window.onload = solicitarLocalizacao;
+
 
          // Coordenadas do estabelecimento
     const lojaLatitude = -23.053728508978047;
@@ -1597,15 +1768,7 @@ input[type="number"] {
  
         function initMap() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-            const latUsuario = position.coords.latitude;
-            const lngUsuario = position.coords.longitude;
-            calcularDistancia(latUsuario, lngUsuario);
-        }, function (error) {
-            alert("Não foi possível obter sua localização.");
-        });
-    } else {
-        alert("Geolocalização não suportada pelo seu navegador.");
+       desativar
     }
 }
 
@@ -1651,22 +1814,37 @@ function calcularDistancia(userLat, userLng) {
         if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
             const distanciaKm = response.rows[0].elements[0].distance.value / 1000;
             console.log(`📍 Distância calculada: ${distanciaKm.toFixed(2)} km`);
-            
-            // Define a taxa de entrega baseada na distância (ajuste conforme necessário)
-            let taxaEntrega = distanciaKm * 2; // Exemplo: R$2 por km
-            taxaEntrega = taxaEntrega < 5 ? 5 : taxaEntrega.toFixed(2); // Taxa mínima de R$5
+
+            // ✅ FAIXAS DE TAXA FIXA (SEM CÁLCULO POR KM)
+            let taxaEntrega;
+            if (distanciaKm <= 2) {
+                taxaEntrega = 5.00;
+            } else if (distanciaKm <= 5) {
+                taxaEntrega = 10.00;
+            } else if (distanciaKm <= 10) {
+                taxaEntrega = 15.00;
+            } else if (distanciaKm <= 20) {
+                taxaEntrega = 20.00;
+            } else if (distanciaKm <= 50) {
+                taxaEntrega = 30.00;
+            } else if (distanciaKm <= 100) {
+                taxaEntrega = 40.00;
+            } else {
+                taxaEntrega = 70.00; // Para distâncias muito longas
+            }
 
             // Salva a taxa para uso posterior
             sessionStorage.setItem("taxaEntrega", taxaEntrega);
 
-            alert(`📍 Distância até o estabelecimento: ${distanciaKm.toFixed(2)} km. Taxa: R$ ${taxaEntrega}`);
-
+            alert(`📍 Distância: ${distanciaKm.toFixed(2)} km. Taxa de entrega: R$ ${taxaEntrega.toFixed(2)}`);
         } else {
             console.error("Erro ao calcular distância:", response);
             alert("Erro ao calcular a distância.");
         }
     });
 }
+
+
 
 
     
@@ -1729,9 +1907,8 @@ function calcularDistancia(userLat, userLng) {
            }
        }
 
-    // Função para verificar a forma de pagamento e abrir o pop-up de troco
-    function checkPaymentMethod() {
-    console.log("Verificando forma de pagamento e localização...");
+       function checkPaymentMethod() {
+    console.log("Verificando forma de pagamento...");
 
     let paymentMethod = document.getElementById("forma-pagamento").value;
     let erroPagamento = document.getElementById("erro-pagamento");
@@ -1743,53 +1920,64 @@ function calcularDistancia(userLat, userLng) {
         erroPagamento.style.display = "none";
     }
 
-    // Verifica se a geolocalização está disponível
-    if ("geolocation" in navigator) {
-        navigator.permissions.query({ name: "geolocation" }).then(function (result) {
-            if (result.state === "granted") {
-                // Permissão já concedida, obtém a localização diretamente
-                navigator.geolocation.getCurrentPosition(
-                    function (position) {
-                        calcularTaxaEntrega(position.coords.latitude, position.coords.longitude);
-                    },
-                    function (error) {
-                        alert("Erro ao obter localização. Taxa de entrega pode estar incorreta.");
-                        atualizarResumoPedido(10.00); // Define taxa padrão
-                    }
-                );
-            } else if (result.state === "prompt") {
-                // Solicita permissão ao usuário
-                if (confirm("Precisamos da sua localização para calcular a taxa de entrega. Deseja permitir?")) {
-                    navigator.geolocation.getCurrentPosition(
-                        function (position) {
-                            calcularTaxaEntrega(position.coords.latitude, position.coords.longitude);
-                        },
-                        function (error) {
-                            alert("Erro ao obter localização. Taxa de entrega pode estar incorreta.");
-                            atualizarResumoPedido(10.00); // Define taxa padrão
-                        }
-                    );
-                } else {
-                    alert("Você negou a permissão de localização. A taxa de entrega pode não ser calculada corretamente.");
-                    atualizarResumoPedido(10.00); // Define taxa padrão
-                }
-            } else {
-                // Permissão negada pelo usuário
-                alert("Você negou a permissão de localização. A taxa de entrega pode não ser calculada corretamente.");
-                atualizarResumoPedido(10.00); // Define taxa padrão
-            }
-        });
-    } else {
-        alert("Seu navegador não suporta geolocalização.");
-        atualizarResumoPedido(10.00); // Define taxa padrão
-    }
-
+    // Se for pagamento em dinheiro, perguntar sobre o troco
     if (paymentMethod === "dinheiro") {
-        document.getElementById("popup-troco").style.display = "flex"; // Exibe popup de troco
+        document.getElementById("popup-troco").style.display = "flex";
     } else {
-        proceedToOrder();
+        // Se não for dinheiro, pula a pergunta do troco
+        localStorage.setItem("troco", "Não precisa");
+        abrirPopupAdicionais();
     }
 }
+
+// Exibe ou oculta o campo de troco corretamente
+function showTrocoInput(needsChange) {
+    let trocoDiv = document.getElementById("troco-input-div");
+
+    if (needsChange) {
+        trocoDiv.style.display = "block"; // Mostra o campo de valor do troco
+    } else {
+        trocoDiv.style.display = "none"; 
+        localStorage.setItem("troco", "Não precisa");
+        document.getElementById("popup-troco").style.display = "none";
+        abrirPopupAdicionais(); // Continua para os adicionais
+    }
+}
+
+// Confirmação do valor do troco antes de seguir
+function confirmTroco() {
+    let valorTroco = document.getElementById("valor-troco").value.trim();
+
+    if (!valorTroco) {
+        alert("⚠️ Por favor, insira o valor para o troco.");
+        return;
+    }
+
+    localStorage.setItem("troco", `Precisa de troco para R$ ${valorTroco}`);
+    document.getElementById("popup-troco").style.display = "none";
+    
+    abrirPopupAdicionais(); // Continua para os adicionais
+}
+
+// Função para abrir o pop-up de adicionais após definir o troco
+function abrirPopupAdicionais() {
+    document.getElementById("popup-caixa02-adicional").style.display = "flex";
+}
+
+    
+// Função para confirmar os adicionais e seguir para a confirmação do pedido
+function confirmarAdicionais() {
+    atualizarResumoPedido(); // Atualiza resumo com os adicionais
+    document.getElementById("popup-caixa02-adicional").style.display = "none";
+    document.getElementById("popup-confirmation").style.display = "flex"; // Abre confirmação final
+}
+
+// Função para pular adicionais e seguir direto para a confirmação
+function pularAdicionais() {
+    document.getElementById("popup-caixa02-adicional").style.display = "none";
+    document.getElementById("popup-confirmation").style.display = "flex"; // Abre confirmação final
+}
+
 
 
 
@@ -1808,70 +1996,44 @@ function calcularDistancia(userLat, userLng) {
 
 
 
-    // Exibe ou oculta o campo de valor do troco
-    function showTrocoInput(needsChange) {
-        if (needsChange) {
-            document.getElementById("troco-input-div").style.display = "block";
-        } else {
-            localStorage.setItem("troco", "Não precisa"); // Armazena a resposta
-            document.getElementById("popup-troco").style.display = "none";
-            proceedToOrder(); // Continua para o pedido
-        }
-    }
+    
 
-    function atualizarResumoPedido() {
+function atualizarResumoPedido() {
     let total = 0;
     let resumoItens = "";
     let resumoExtras = "";
 
     let observacao = document.getElementById("observacao").value.trim();
-    let troco = sessionStorage.getItem("troco") || "";
-
-    // Recupera a taxa de entrega salva
-    let taxaEntrega = parseFloat(sessionStorage.getItem("taxaEntrega")) || 0;
+    let troco = sessionStorage.getItem("troco") || "Não precisa"; // Recupera o troco
+    let taxaEntrega = parseFloat(sessionStorage.getItem("taxaEntrega")) || 0; // Recupera taxa de entrega
 
     let items = [
-    { name: "Queijo Quente Salada", id: "Queijo Quente Salada-quantity", price: 20.00 },
-    { name: "Queijo Quente", id: "Queijo Quente-quantity", price: 19.00 },
-    { name: "Misto Quente", id: "Misto Quente-quantity", price: 19.00 },
-    { name: "Bauru", id: "Bauru-quantity", price: 20.00 },
-    { name: "Americano", id: "Americano-quantity", price: 22.00 },
-    { name: "Mistão", id: "Mistão-quantity", price: 23.00 },
-    { name: "X-Salada", id: "X-Salada-quantity", price: 22.00 },
-    { name: "X-Bacon", id: "X-Bacon-quantity", price: 26.00 },
-    { name: "X-Burguer", id: "X-Burguer-quantity", price: 21.00 },
-    { name: "X-Burguer Duplo", id: "X-Burguer Duplo-quantity", price: 30.00 },
-    { name: "X-Egg", id: "X-Egg-quantity", price: 24.00 },
-    { name: "X-Bacon Egg", id: "X-Bacon Egg-quantity", price: 28.00 },
-    { name: "X-Bacon Calabresa", id: "X-Bacon Calabresa-quantity", price: 28.00 },
-    { name: "X-Crock", id: "X-Crock-quantity", price: 24.00 },
-    { name: "Lanche da Casa", id: "Lanche da Casa-quantity", price: 29.00 },
-    { name: "X-Calabresa", id: "X-Calabresa-quantity", price: 22.00 },
-    { name: "X-Tudo", id: "X-Tudo-quantity", price: 35.00 },
-    { name: "X-Frango Crock", id: "X-Frango Crock-quantity", price: 26.00 },
-    { name: "X-Framburguer", id: "X-Framburguer-quantity", price: 32.00 },
-    { name: "X-Frango Bacon Egg", id: "X-Frango Bacon Egg-quantity", price: 28.00 },
-    { name: "X-Frango", id: "X-Frango-quantity", price: 23.00 },
-    { name: "X-Frango Catupiry", id: "X-Frango Catupiry-quantity", price: 30.00 },
-    { name: "X-Frango Cheddar", id: "X-Frango Cheddar-quantity", price: 30.00 },
-    { name: "X-Frango Catupiry Milho", id: "X-Frango Catupiry Milho-quantity", price: 32.00 },
-    { name: "X-Frango Cheddar Milho", id: "X-Frango Cheddar Milho-quantity", price: 32.00 },
-    { name: "X-Frango Egg", id: "X-Frango Egg-quantity", price: 25.00 },
-    { name: "X-Frango Bacon", id: "X-Frango Bacon-quantity", price: 25.00 },
-    { name: "Refrigerante", id: "Refrigerante-quantity", price: 5.00 }
-];
+        { name: "Queijo Quente Salada", id: "Queijo Quente Salada-quantity", price: 20.00 },
+        { name: "Queijo Quente", id: "Queijo Quente-quantity", price: 19.00 },
+        { name: "Misto Quente", id: "Misto Quente-quantity", price: 19.00 },
+        { name: "Bauru", id: "Bauru-quantity", price: 20.00 },
+        { name: "Americano", id: "Americano-quantity", price: 22.00 },
+        { name: "Mistão", id: "Mistão-quantity", price: 23.00 },
+        { name: "X-Salada", id: "X-Salada-quantity", price: 22.00 },
+        { name: "X-Bacon", id: "X-Bacon-quantity", price: 26.00 },
+        { name: "X-Burguer", id: "X-Burguer-quantity", price: 21.00 },
+        { name: "X-Burguer Duplo", id: "X-Burguer Duplo-quantity", price: 30.00 },
+        { name: "X-Egg", id: "X-Egg-quantity", price: 24.00 },
+        { name: "Refrigerante", id: "Refrigerante-quantity", price: 5.00 }
+    ];
 
-let extras = [
-    { name: "Hamburguer", id: "Hamburguer-quantity", price: 9.00 },
-    { name: "Bacon", id: "Bacon-quantity", price: 7.00 },
-    { name: "Batata Palha", id: "BatataPalha-quantity", price: 3.00 },
-    { name: "Cheddar", id: "Cheddar-quantity", price: 7.00 },
-    { name: "Catupiry", id: "Catupiry-quantity", price: 7.00 },
-    { name: "Milho", id: "Milho-quantity", price: 2.00 },
-    { name: "Salada", id: "Salada-quantity", price: 2.00 },
-    { name: "Maionese", id: "Maionese-quantity", price: 3.00 }
-];
+    let extras = [
+        { name: "Hamburguer", id: "Hamburguer-quantity", price: 9.00 },
+        { name: "Bacon", id: "Bacon-quantity", price: 7.00 },
+        { name: "Batata Palha", id: "BatataPalha-quantity", price: 3.00 },
+        { name: "Cheddar", id: "Cheddar-quantity", price: 7.00 },
+        { name: "Catupiry", id: "Catupiry-quantity", price: 7.00 },
+        { name: "Milho", id: "Milho-quantity", price: 2.00 },
+        { name: "Salada", id: "Salada-quantity", price: 2.00 },
+        { name: "Maionese", id: "Maionese-quantity", price: 3.00 }
+    ];
 
+    // Calcula total de itens
     items.forEach(item => {
         let quantity = parseInt(document.getElementById(item.id)?.value || 0);
         if (quantity > 0) {
@@ -1880,6 +2042,7 @@ let extras = [
         }
     });
 
+    // Calcula total de extras
     extras.forEach(extra => {
         let quantity = parseInt(document.getElementById(extra.id)?.value || 0);
         if (quantity > 0) {
@@ -1888,15 +2051,15 @@ let extras = [
         }
     });
 
-    // Adiciona a taxa de entrega ao total
+    // Adiciona taxa de entrega
     total += taxaEntrega;
 
     // Atualiza os elementos do resumo do pedido
     document.getElementById("itens-pedido").innerHTML = resumoItens;
-    document.getElementById("extras-pedido").innerHTML = resumoExtras || "<div>Sem adicionais</div>"; // Se não tiver extras, mostra "Sem adicionais"
+    document.getElementById("extras-pedido").innerHTML = resumoExtras || "<div>Sem adicionais</div>"; 
     document.getElementById("total-pedido").innerText = `R$ ${total.toFixed(2)}`;
 
-    // Garante que a taxa de entrega apareça no resumo do pedido
+    // Exibir taxa de entrega
     let taxaEntregaElement = document.getElementById("taxa-entrega");
     if (!taxaEntregaElement) {
         taxaEntregaElement = document.createElement("div");
@@ -1905,9 +2068,9 @@ let extras = [
         taxaEntregaElement.style.color = "red";
         document.getElementById("order-summary").appendChild(taxaEntregaElement);
     }
-    taxaEntregaElement.innerHTML = `🚚 Taxa de entrega: R$ ${taxaEntrega}`;
+    taxaEntregaElement.innerHTML = `🚚 Taxa de entrega: R$ ${taxaEntrega.toFixed(2)}`;
 
-    // Adiciona observação se houver
+    // Exibir observação
     let observacaoElement = document.getElementById("observacao-pedido");
     if (!observacaoElement) {
         observacaoElement = document.createElement("div");
@@ -1915,21 +2078,44 @@ let extras = [
         document.getElementById("order-summary").appendChild(observacaoElement);
     }
     observacaoElement.innerHTML = observacao ? `📝 Observação: ${observacao}` : "<div>Sem observações</div>";
+
+    // ✅ Exibir troco no resumo do pedido
+    let trocoElement = document.getElementById("troco-pedido");
+    if (!trocoElement) {
+        trocoElement = document.createElement("div");
+        trocoElement.id = "troco-pedido";
+        document.getElementById("order-summary").appendChild(trocoElement);
+    }
+    trocoElement.innerHTML = `💰 Troco: ${troco}`;
 }
 
 
-    // Confirma o valor do troco e segue para o pedido
-    function confirmTroco() {
-        let trocoValue = document.getElementById("valor-troco").value;
-        if (trocoValue.trim() === "" || isNaN(trocoValue) || trocoValue <= 0) {
-            alert("Por favor, informe um valor válido para o troco.");
-            return;
-        }
+function showTrocoInput(needsChange) {
+    let trocoDiv = document.getElementById("troco-input-div");
 
-        sessionStorage.setItem("troco", "Precisa de troco para R$ " + parseFloat(trocoValue).toFixed(2));
+    if (needsChange) {
+        trocoDiv.style.display = "block"; // Mostra o campo para inserir o valor do troco
+    } else {
+        trocoDiv.style.display = "none"; 
+        localStorage.setItem("troco", "Não precisa"); // Salva no armazenamento
         document.getElementById("popup-troco").style.display = "none";
         proceedToOrder(); // Continua para o pedido
     }
+}
+
+function confirmTroco() {
+    let valorTroco = document.getElementById("valor-troco").value.trim();
+
+    if (!valorTroco) {
+        alert("⚠️ Por favor, insira o valor para o troco.");
+        return;
+    }
+
+    localStorage.setItem("troco", `Precisa de troco para R$ ${valorTroco}`);
+    document.getElementById("popup-troco").style.display = "none";
+    
+    proceedToOrder(); // Continua para a confirmação do pedido
+}
 
 
     // Exibe o popup de adicionais antes do resumo do pedido
